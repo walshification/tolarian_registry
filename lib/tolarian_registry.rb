@@ -1,24 +1,32 @@
 require "tolarian_registry/version"
+require 'unirest'
 
 module TolarianRegistry
   class Registry
-    attr_accessor :card, :set
+    attr_accessor :card, :set, :multiverse_id
 
-    def initialize(options = {})
-      @card = options || ''
-      @set = options || ''
+    def initialize(hash)
+      # @card = hash["name"]
+      # @set = hash["editions"]["set"]
+      @multiverse_id = hash[:multiverse_id]
     end
 
-    def tcgplayer_price(card, set)
-      @card = Unirest.get("http://magictcgprices.appspot.com/api/tcgplayer/price.json?cardname=#{card}&cardset=#{set}").body
+    def low_price
+      @card = Unirest.get("https://api.deckbrew.com/mtg/cards?multiverseid=#{@multiverse_id}").body
+      @card["editions"].each do |edition|
+        @price = edition["price"]["low"] if edition["multiverse_id"] == @multiverse_id
+      end
     end
 
-    def cfb_price(card, set)
-      @card = Unirest.get("http://magictcgprices.appspot.com/api/cfb/price.json?cardname=#{card}&cardset=#{set}").body
+    def avg_price
+      @card = Unirest.get("https://api.deckbrew.com/mtg/cards?multiverseid=#{@multiverse_id}").body
+      @card["editions"]["price"]["average"]
     end
 
-    def ebay_price(card, set)
-      @card = Unirest.get("http://magictcgprices.appspot.com/api/ebay/price.json?cardname=#{card}&cardset=#{set}").body
+    def high_price
+      @card = Unirest.get("https://api.deckbrew.com/mtg/cards?multiverseid=#{@multiverse_id}").body
+      @card["editions"]["price"]["high"]
     end
+
   end
 end
