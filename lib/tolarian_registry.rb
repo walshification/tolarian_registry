@@ -33,6 +33,16 @@ module TolarianRegistry
       @released_at = api_hash["releasedAt"]
     end
 
+    def self.find_by_name(name)
+      card = Unirest.get("http://api.mtgdb.info/cards/#{name}").body.first
+      if card
+        multiverse_id = card["id"]
+        return Card.new(:multiverse_id => multiverse_id)
+      else
+        return nil
+      end
+    end
+
     def low_price
       @price = get_price("low")
     end
