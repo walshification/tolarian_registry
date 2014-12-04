@@ -7,34 +7,31 @@ module TolarianRegistry
 
     def initialize(hash)
       @multiverse_id = hash[:multiverse_id]
-      api_hash = Unirest.get("http://api.mtgdb.info/cards/#{@multiverse_id}").body
-      @related_card_id = api_hash["relatedCardId"]
-      @set_number = api_hash["setNumber"]
+      api_hash = Unirest.get("https://api.deckbrew.com/mtg/cards?multiverseid=#{@multiverse_id}").body
       @card_name = api_hash["name"]
-      @search_name = api_hash["searchName"]
-      @description = api_hash["description"]
-      @flavor = api_hash["flavor"]
+      @editions = api_hash["editions"]
+      @text = api_hash["text"]
+      @flavor = api_hash["editions"]["flavor"]
       @colors = api_hash["colors"]
-      @mana_cost = api_hash["manaCost"]
-      @converted_mana_cost = api_hash["convertedManaCost"]
-      @card_set_name = api_hash["cardSetName"]
-      @card_type = api_hash["type"]
-      @card_subtype = api_hash["subType"]
+      @mana_cost = api_hash["cost"]
+      @converted_mana_cost = api_hash["cmc"]
+      @card_set_name = api_hash["editions"]["set"]
+      @card_types = api_hash["types"]
+      @card_subtypes = api_hash["subtypes"]
+      @card_supertypes = api_hash["supertypes"]
       @power = api_hash["power"]
       @toughness = api_hash["toughness"]
       @loyalty = api_hash["loyalty"]
-      @rarity = api_hash["rarity"]
-      @artist = api_hash["artist"]
-      @card_set_id = api_hash["cardSetId"]
-      @token = api_hash["token"]
-      @promo = api_hash["promo"]
+      @rarity = api_hash["editions"]["rarity"]
+      @artist = api_hash["editions"]["artist"]
+      @card_set_id = api_hash["editions"]["set_id"]
       @rulings = api_hash["rulings"]
       @formats = api_hash["formats"]
       @released_at = api_hash["releasedAt"]
     end
 
     def self.find_by_name(name)
-      card = Unirest.get("http://api.mtgdb.info/cards/#{name}").body.first
+      card = Unirest.get("https://api.deckbrew.com/mtg/cards/#{name}").body.first
       if card
         multiverse_id = card["id"]
         return Card.new(:multiverse_id => multiverse_id)
