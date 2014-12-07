@@ -3,37 +3,36 @@ require 'unirest'
 
 module TolarianRegistry
   class Card
-    attr_accessor :multiverse_id, :related_card_id, :set_number, :card_name, :search_name, :description, :flavor, :colors, :mana_cost, :converted_mana_cost, :card_set_name, :card_type, :card_subtype, :power, :toughness, :loyalty, :rarity, :artist, :card_set_id, :token, :promo, :rulings, :formats, :released_at
+    attr_accessor :multiverse_id, :card_name, :editions, :text, :flavor, :colors, :mana_cost, :converted_mana_cost, :card_set_name, :card_type, :card_subtype, :power, :toughness, :loyalty, :rarity, :artist, :card_set_id, :rulings, :formats
 
     def initialize(hash)
       @multiverse_id = hash[:multiverse_id]
-      api_hash = Unirest.get("https://api.deckbrew.com/mtg/cards?multiverseid=#{@multiverse_id}").body
-      @card_name = api_hash["name"]
-      @editions = api_hash["editions"]
-      @text = api_hash["text"]
-      @flavor = api_hash["editions"]["flavor"]
-      @colors = api_hash["colors"]
-      @mana_cost = api_hash["cost"]
-      @converted_mana_cost = api_hash["cmc"]
-      @card_set_name = api_hash["editions"]["set"]
-      @card_types = api_hash["types"]
-      @card_subtypes = api_hash["subtypes"]
-      @card_supertypes = api_hash["supertypes"]
-      @power = api_hash["power"]
-      @toughness = api_hash["toughness"]
-      @loyalty = api_hash["loyalty"]
-      @rarity = api_hash["editions"]["rarity"]
-      @artist = api_hash["editions"]["artist"]
-      @card_set_id = api_hash["editions"]["set_id"]
-      @rulings = api_hash["rulings"]
-      @formats = api_hash["formats"]
-      @released_at = api_hash["releasedAt"]
+      deckbrew_hash = Unirest.get("https://api.deckbrew.com/mtg/cards?multiverseid=#{@multiverse_id}").body.first
+      mtgdb_hash = Unirest.get("http://api.mtgdb.info/cards/#{@multiverse_id}").body
+      @card_name = deckbrew_hash["name"]
+      @editions = deckbrew_hash["editions"]
+      @text = deckbrew_hash["text"]
+      @flavor = deckbrew_hash["editions"][0]["flavor"]
+      @colors = deckbrew_hash["colors"]
+      @mana_cost = deckbrew_hash["cost"]
+      @converted_mana_cost = deckbrew_hash["cmc"]
+      @card_set_name = deckbrew_hash["editions"][0]["set"]
+      @card_type = mtgdb_hash["type"]
+      @card_subtype = mtgdb_hash["subType"]
+      @power = deckbrew_hash["power"]
+      @toughness = deckbrew_hash["toughness"]
+      @loyalty = deckbrew_hash["loyalty"]
+      @rarity = deckbrew_hash["editions"][0]["rarity"]
+      @artist = deckbrew_hash["editions"][0]["artist"]
+      @card_set_id = deckbrew_hash["editions"][0]["set_id"]
+      @rulings = mtgdb_hash["rulings"]
+      @formats = mtgdb_hash["formats"]
     end
 
     def self.find_by_name(name)
-      card = Unirest.get("https://api.deckbrew.com/mtg/cards/#{name}").body.first
+      card = Unirest.get("https://api.deckbrew.com/mtg/cards?name=#{name}").body.first["editions"].first
       if card
-        multiverse_id = card["id"]
+        multiverse_id = card["multiverse_id"]
         return Card.new(:multiverse_id => multiverse_id)
       else
         return nil
