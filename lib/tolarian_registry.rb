@@ -3,7 +3,7 @@ require 'unirest'
 
 module TolarianRegistry
   class Card
-    attr_accessor :multiverse_id, :card_name, :editions, :text, :flavor, :colors, :mana_cost, :converted_mana_cost, :card_set_name, :card_type, :card_subtype, :power, :toughness, :loyalty, :rarity, :artist, :card_set_id, :rulings, :formats
+    attr_accessor :multiverse_id, :card_name, :editions, :text, :flavor, :colors, :mana_cost, :converted_mana_cost, :card_set_name, :card_type, :card_subtype, :power, :toughness, :loyalty, :rarity, :artist, :card_set_id, :image_url, :rulings, :formats
 
     def initialize(hash)
       @multiverse_id = hash[:multiverse_id]
@@ -25,14 +25,15 @@ module TolarianRegistry
       @rarity = deckbrew_hash["editions"][0]["rarity"]
       @artist = deckbrew_hash["editions"][0]["artist"]
       @card_set_id = deckbrew_hash["editions"][0]["set_id"]
+      @image_url = deckbrew_hash["editions"][0]["image_url"]
       @rulings = mtgdb_hash["rulings"]
       @formats = mtgdb_hash["formats"]
     end
 
     def self.find_by_name(name)
-      card = Unirest.get("https://api.deckbrew.com/mtg/cards?name=#{name}").body.first["editions"].first
+      card = Unirest.get("http://api.mtgdb.info/cards/#{name}").body.first
       if card
-        multiverse_id = card["multiverse_id"]
+        multiverse_id = card["id"]
         return Card.new(:multiverse_id => multiverse_id)
       else
         return nil
