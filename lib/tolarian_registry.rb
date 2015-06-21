@@ -8,7 +8,7 @@ module TolarianRegistry
     def initialize(hash)
       @multiverse_id = hash[:multiverse_id]
       deckbrew_hash = Unirest.get("https://api.deckbrew.com/mtg/cards?multiverseid=#{@multiverse_id}").body.first
-      mtgdb_hash = Unirest.get("http://api.mtgdb.info/cards/#{@multiverse_id}").body
+      # mtgdb_hash = Unirest.get("http://api.mtgdb.info/cards/#{@multiverse_id}").body
       @card_name = deckbrew_hash["name"]
       @editions = deckbrew_hash["editions"]
       @text = deckbrew_hash["text"]
@@ -17,8 +17,8 @@ module TolarianRegistry
       @mana_cost = deckbrew_hash["cost"]
       @converted_mana_cost = deckbrew_hash["cmc"]
       @card_set_name = deckbrew_hash["editions"][0]["set"]
-      @card_type = mtgdb_hash["type"]
-      @card_subtype = mtgdb_hash["subType"]
+      # @card_type = mtgdb_hash["type"]
+      # @card_subtype = mtgdb_hash["subType"]
       @power = deckbrew_hash["power"]
       @toughness = deckbrew_hash["toughness"]
       @loyalty = deckbrew_hash["loyalty"]
@@ -26,12 +26,12 @@ module TolarianRegistry
       @artist = deckbrew_hash["editions"][0]["artist"]
       @card_set_id = deckbrew_hash["editions"][0]["set_id"]
       @image_url = deckbrew_hash["editions"][0]["image_url"]
-      @rulings = mtgdb_hash["rulings"]
-      @formats = mtgdb_hash["formats"]
+      # @rulings = mtgdb_hash["rulings"]
+      # @formats = mtgdb_hash["formats"]
     end
 
     def self.find_by_name(name)
-      card = Unirest.get("http://api.mtgdb.info/cards/#{name}").body.first
+      card = Unirest.get("https://api.deckbrew.com/mtg/cards?name=#{name}").body.first
       if card
         multiverse_id = card["id"]
         return Card.new(:multiverse_id => multiverse_id)
